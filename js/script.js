@@ -55,7 +55,6 @@
         select.append(createOption(i));
       }
       textField.append(select);
-      console.log(select);
       textField.append($("<br>"));
       textField.append($("<button>Remove slot</button>").addClass("btn").click(function () {
         casino.removeSlotMachine()
@@ -118,17 +117,21 @@
       }
       //first slotMachine recieve remainder
       self._machines[0].addMoney(money);
-
-      //It is for supports and teachers
-      for (i = 0; i < self._machines.length; i++) {
-        console.log(self._machines[i]);
-      }
     }
 
     function setLucky() {
       var luckyIndex = Math.round(Math.random() * (self._slotMachineCount));
       self._machines[luckyIndex].setLucky();
     }
+
+    this.showInConsole();
+  }
+
+  //It is for supports and teachers
+  Casino.prototype.showInConsole = function() {
+    for (i = 0; i < self._machines.length; i++) {
+        console.log(self._machines[i]);
+      }
   }
 
   Casino.prototype.getTotalSum = function () {
@@ -147,12 +150,25 @@
     var newMachine = new SlotMachine(Math.floor(maxMoney / 2));
     this._machines.push(newMachine);
     this._slotMachineCount++;
+
+    this.showInConsole();
   }
 
   Casino.prototype.removeSlotMachine = function () {
     var removeMachineIndex = $("#remove-machine");
-    this._machines.splice(removeMachineIndex, 1);
+    var removingSlot = this._machines.splice(removeMachineIndex, 1);
     this._slotMachineCount--;
+
+    //divide money
+    var money = removingSlot.getMoney();
+    var moneyPerSlot = money/this._machines.length;
+    for (var i = 0; i < this._machines.length; i++) {
+      this._machines[i].addMoney(moneyPerSlot);
+      money-=moneyPerSlot;
+    }
+    this._machines[0].addMoney(money);
+
+    this.showInConsole();
   }
 
   //Class
