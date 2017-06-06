@@ -5,12 +5,21 @@
   box-sizing: border-box;
 }
 
+.slot,
+.user {
+  font-family: 'Pacifico', cursive;
+}
+
 body {
   width: 100%;
 }
 
 .main {
   height: 100vh;
+}
+
+.hide {
+  display: none;
 }
 
 .method-test,
@@ -69,7 +78,6 @@ body {
   width: 350px;
   height: 280px;
   background-color: #85C5D6;
-  font-family: 'Pacifico', cursive;
   border-radius: 50px 50px;
 }
 
@@ -118,6 +126,15 @@ body {
 }
 
 .slick-next::before,
-.slick-prev::before{
+.slick-prev::before,
+.user{
   color: #3498db;
+}
+
+.user {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 200px;
+  height: 100px;
 }

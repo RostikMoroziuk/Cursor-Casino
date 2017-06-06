@@ -160,17 +160,6 @@
       }).addClass("take-money");
     }
 
-    function validMoneyInput(money) {
-      if (isNaN(+money)) {
-        alert("You enter NaN. You did not take money");
-        return false;
-      } else if (money < 1) {
-        alert("Not correct sum.")
-        return false;
-      }
-      return true;
-    }
-
     function createActiveSlotMachines() {
       var select = $("<select>Remove slot number</select>").addClass("select");
       for (var i = 0; i < casino.getMachineCount(); i++) {
@@ -186,6 +175,17 @@
       }
       return option;
     }
+  }
+
+  function validMoneyInput(money) {
+    if (isNaN(+money)) {
+      alert("You enter NaN.");
+      return false;
+    } else if (money < 1) {
+      alert("Not correct sum.")
+      return false;
+    }
+    return true;
   }
 
   function printText(text, cb) {
@@ -218,6 +218,7 @@
 
     //slider initialization
     $(".play").removeClass("hide");
+    $(".user").removeClass("hide");
 
     addSlotMachine();
 
@@ -239,20 +240,32 @@
     });
 
     //drums in slot machine
-    $(".drum1").slick({vertical: true, 
-      prevArrow: "", 
+    $(".drum1").slick({
+      vertical: true,
+      prevArrow: "",
       nextArrow: "",
-      touchMove: false});
+      touchMove: false,
+      swipe: false,
+      speed: 50
+    });
     $(".drum1").slick("slickNext");
-    $(".drum2").slick({vertical: true, 
-      prevArrow: "", 
+    $(".drum2").slick({
+      vertical: true,
+      prevArrow: "",
       nextArrow: "",
-      touchMove: false});
+      touchMove: false,
+      swipe: false,
+      speed: 50
+    });
     $(".drum2").slick("slickNext");
-    $(".drum3").slick({vertical: true, 
-      prevArrow: "", 
+    $(".drum3").slick({
+      vertical: true,
+      prevArrow: "",
       nextArrow: "",
-      touchMove: false});
+      touchMove: false,
+      swipe: false,
+      speed: 50
+    });
     $(".drum3").slick("slickNext");
   }
 
@@ -260,10 +273,8 @@
   function addSlotMachine() {
     var slotMachines = casino.getSlotMachines();
     var sliderFor = $(".slider-for");
-    console.log(sliderFor);
     var sliderNav = $(".slider-nav");
     for (var i = 0; i < slotMachines.length; i++) {
-      console.log(i);
       var slotMachineElement = buildSlotMachineElement(i);
       sliderFor.append(slotMachineElement);
       var slotMachineIcon = buildSlotIcon(i);
@@ -289,7 +300,7 @@
     slot.append(carousels);
 
     var inputs = $("<div></div>").addClass("inputs");
-    var addMoneyInput = $("<input>").addClass("money-input");
+    var addMoneyInput = $("<input>").addClass("money-input").val(0);
     inputs.append(addMoneyInput);
     var start = $("<button>Start</button>").addClass("start-btn").click(startGame);
     inputs.append(start);
@@ -310,9 +321,73 @@
     return drum;
   }
 
-  //TODO: play game!!!
   function startGame() {
+    //valid rate
+    var userRate = $(".money-input").val();
+    validMoneyInput(userRate);
+    if (userRate > user.getBudget()) {
+      alert("Not enough money");
+      userRate = user.getBudget();
+      return;
+    }
 
+    //identify machine
+    var machineIndex = $(this).closest(".slot").attr("data-slot");
+    var machine = casino.getSlotMachines()[machineIndex];
+
+    if (userRate > machine.getMoney() * 5) {
+      alert("Oversized rate for this slot machine");
+      userRate = machine.getMoney();
+      return;
+    }
+
+    var carousels = $(this).closest(".slot").find(".carousels");
+
+    startSlotMachine(machine, userRate, carousels);
+  }
+
+  function startSlotMachine(machine, userRate, carousels) {
+    //payment
+    console.log(machine, user);
+    user.takeMoney(userRate);
+    machine.addMoney(userRate);
+    console.log(machine, user);
+
+    //scrolling
+    var steps = [getRandomStep(50), getRandomStep(50), getRandomStep(50)];
+    var timer1 = setInterval(function () {
+      if (steps[0] > 0) {
+        steps[0]--;
+        carousels.children(".drum1").slick("slickNext");
+      } else {
+        clearInterval(timer1);
+        console.log(steps);
+      }
+    }, 100);
+    var timer2 = setInterval(function () {
+      if (steps[1] > 0) {
+        steps[1]--;
+        carousels.children(".drum2").slick("slickNext");
+      } else {
+        clearInterval(timer2);
+        console.log(steps);
+      }
+    }, 100);
+    var timer3 = setInterval(function () {
+      if (steps[2] > 0) {
+        steps[2]--;
+        carousels.children(".drum3").slick("slickNext");
+      } else {
+        clearInterval(timer3);
+        console.log(steps);
+      }
+    }, 100)
+    
+
+  }
+
+  function getRandomStep(max) {
+    return Math.floor(Math.random() * max);
   }
 
   //Class
@@ -479,7 +554,29 @@
     return this._money;
   }
 
+  function User(name, budget) {
+    this._name = name;
+    if (isNaN(budget) || budget < 0) {
+      alert("Budget must be positive number. Set default value.");
+      budget = 100;
+    }
+    this._budget = budget;
+  }
+
+  User.prototype.getBudget = function () {
+    return this._budget;
+  }
+
+  User.prototype.takeMoney = function (money) {
+    if (this._budget >= money) {
+      this._budget -= money;
+    } else {
+      alert("Not enough money");
+    }
+  }
+
   var casino = new Casino(5, 1002);
+  var user = new User("User", 100);
   casino.init(); //create all slot machines
   //TODO: delete comment
   //testMethod();
