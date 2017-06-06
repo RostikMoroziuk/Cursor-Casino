@@ -83,11 +83,11 @@
           }
           textField.append("You take " + casino.takeMoney(moneyValue) + "$");
           textField.append($("<br>"));
+
+          casino.showInConsole();
+
+          printText(text[5], testSelectSlotMachine);
         }
-
-        casino.showInConsole();
-
-        printText(text[5], testSelectSlotMachine);
       }));
     }
 
@@ -132,15 +132,13 @@
             moneyValue = slotMachine.getMoney();
           }
 
-          casino.showInConsole();
-
           textField.append("You take " + slotMachine.takeMoney(moneyValue) + "$");
           textField.append($("<br>"));
+
+          casino.showInConsole();
+
+          printText(text[8], testAddMoneyToSlotMachine);
         }
-
-        casino.showInConsole();
-
-        printText(text[8], testAddMoneyToSlotMachine);
       }));
     }
 
@@ -150,16 +148,17 @@
       textField.append(addMoneyInput);
       textField.append($("<button>Add money to slot</button>").addClass("btn").click(function () {
         var moneyValue = $("#add-to-slot").val();
+        console.log(moneyValue);
         var slotMachine = casino.getSelectedSlotMachine();
         if (validMoneyInput(moneyValue)) {
           slotMachine.addMoney(moneyValue);
           textField.append("You add " + moneyValue + "$");
           textField.append($("<br>"));
+
+          casino.showInConsole();
+
+          printText(text[9], addPlayButton);
         }
-
-        casino.showInConsole();
-
-        printText(text[9], addPlayButton);
       }));
     }
     //Testing finish
@@ -223,7 +222,7 @@
       } else {
         textField.append(text.charAt(i++)); //print text
       }
-    }, 30)
+    }, 1)
   }
 
   //Class
@@ -243,13 +242,25 @@
     this._selectedMachine = null;
 
     var self = this;
+  }
+
+  //It is for supports and teachers
+  Casino.prototype.showInConsole = function () {
+    console.log("machines ", this._machines);
+    console.log("total sum " + this._totalSum);
+    console.log("selected machine ", this._selectedMachine);
+  }
+
+  Casino.prototype.init = function () {
+    var self = this;
 
     createSlotMachines();
     setLucky(); //One slotMachine must be lucky
 
     //private function create slot machines
     function createSlotMachines() {
-      var moneyForMachine = Math.floor(money / slotMachineCount)
+      var money = self._totalSum;
+      var moneyForMachine = Math.floor(money / self._slotMachineCount)
       for (var i = 0; i < self._slotMachineCount; i++) {
         self._machines[i] = new SlotMachine(moneyForMachine);
         money -= moneyForMachine;
@@ -262,13 +273,6 @@
       var luckyIndex = Math.floor(Math.random() * (self._slotMachineCount));
       self._machines[luckyIndex].setLucky();
     }
-  }
-
-  //It is for supports and teachers
-  Casino.prototype.showInConsole = function () {
-    console.log("machines ", this._machines);
-    console.log("total sum " + this._totalSum);
-    console.log("selected machine ", this._selectedMachine);
   }
 
   Casino.prototype.getTotalSum = function () {
@@ -287,7 +291,7 @@
     var newMachine = new SlotMachine(Math.floor(maxMoney / 2));
     this._machines.push(newMachine);
     this._slotMachineCount++;
-    this._totalSum += newMachine.getMoney();
+    this.calcTotalSum();
   }
 
   Casino.prototype.removeSlotMachine = function () {
@@ -305,6 +309,12 @@
     this._machines[0].addMoney(money);
   }
 
+  Casino.prototype.calcTotalSum = function () {
+    this._totalSum = this._machines.reduce(function (prev, next) {
+      return (prev + next.getMoney());
+    }, 0)
+  }
+
   Casino.prototype.takeMoney = function (value) {
     var money = 0;
     var takeMoney = 0;
@@ -315,10 +325,10 @@
         takeMoney = value - money
         money += takeMoney;
         slot.takeMoney(takeMoney);
-        this._totalSum -= takeMoney;
+        this.calcTotalSum();
       } else {
         money += slot.getMoney();
-        this._totalSum -= slot.getMoney();
+        this.calcTotalSum();
         slot.takeMoney(slot.getMoney());
       }
     }
@@ -354,11 +364,13 @@
   }
 
   SlotMachine.prototype.addMoney = function (money) {
-    this._money += money;
+    this._money += +money;
+    casino.calcTotalSum();
   }
 
   SlotMachine.prototype.takeMoney = function (money) {
     this._money -= money;
+    casino.calcTotalSum();
     return money;
   }
 
@@ -367,5 +379,6 @@
   }
 
   var casino = new Casino(5, 1002);
+  casino.init(); //create all slot machines
   testMethod();
 })();
