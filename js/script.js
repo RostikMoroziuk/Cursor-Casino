@@ -2,29 +2,27 @@
   function testMethod() {
     //Comma separate strings in different test 
     var text = ["Hi! First of all, I will show you that all method of Casino and SlotMachine work.\
-    Press OK to get total sum.",
-      "Great! To get number of slot machines press OK again.",
+    Press `Get total sum` to get total sum.",
+      "Great! To get number of slot machines press `Get slot count`.",
       "Great work! Now you can add new slot machine (start sum will be calculate as half of the biggest sum in slot machines)",
       "Nice! Now you can see all slots. Select one of it and this slot will be removed.",
       "Now enter amount you want to take.",
-      "Good. We finish test Casino Class. Now, we will be test SlotMachine class. I select first slot machine.",
-      "Press <code class='code'>OK</code> to get total sum in this slot machine.",
-      "Take money from slot.",
+      "Good. We finish test Casino Class. Now, we will test SlotMachine class. Select slot machine for manipulation.",
+      "Press `Get sum in slot` to get total sum in this slot machine.",
+      "Now you can take money from slot.",
       "Enter sum you want add to slot machine.",
       "Great! Now you can play."
     ]
 
     var textField = $(".method-test");
 
-    //get total sum
     printText(text[0], testGetTotalSum);
-
 
     function testGetTotalSum() {
       textField.append($("<button>Get total Sum</button>").addClass("btn").click(function () {
         textField.append(casino.getTotalSum());
         textField.append($("<br>"));
-        //Get count of slots
+
         printText(text[1], testGetSlotMachineCount);
       }))
 
@@ -34,7 +32,7 @@
       textField.append($("<button>Get slot count</button>").addClass("btn").click(function () {
         textField.append(casino.getMachineCount());
         textField.append($("<br>"));
-        //Add new slotMachine
+
         printText(text[2], testAddNewSlotMachine);
       }))
     }
@@ -44,23 +42,139 @@
         casino.addNewSlotMachine()
         textField.append("Added new slot machine");
         textField.append($("<br>"));
-        //Add new slotMachine
+
         printText(text[3], testRemoveSlotMachine);
       }))
     }
 
     function testRemoveSlotMachine() {
-      var select = $("<select>Remove slot number</select>").addClass("select").attr("id", "remove-machine");
-      for (var i = 0; i < casino.getMachineCount(); i++) {
-        select.append(createOption(i));
-      }
+      var select = createActiveSlotMachines();
+      select.attr("id", "remove-machine");
       textField.append(select);
-      textField.append($("<br>"));
       textField.append($("<button>Remove slot</button>").addClass("btn").click(function () {
         casino.removeSlotMachine()
         textField.append("Slot machine removed");
         textField.append($("<br>"));
+        printText(text[4], testTakeMoney);
       }));
+    }
+
+    function testTakeMoney() {
+      var takeMoneyInput = createInputForMoney();
+      takeMoneyInput.attr("id", "take-from-casino");
+      textField.append(takeMoneyInput);
+      textField.append($("<button>Take money from casino</button>").addClass("btn").click(function () {
+        var moneyValue = $("#take-from-casino").val();
+        if (validMoneyInput(moneyValue)) {
+
+          if (moneyValue > casino.getTotalSum()) {
+            alert("You enter value greater than casino has. Will be return all money");
+            moneyValue = casino.getTotalSum();
+          }
+          textField.append("You take " + casino.takeMoney(moneyValue) + "$");
+          textField.append($("<br>"));
+        }
+        printText(text[5], testSelectSlotMachine);
+      }));
+    }
+
+    function testSelectSlotMachine() {
+      var select = createActiveSlotMachines();
+      select.attr("id", "select-machine")
+      textField.append(select);
+
+      textField.append($("<button>Select machine</button>").addClass("btn").click(function () {
+        casino.selectSlotMachine($("#select-machine").val());
+        console.log(casino.getSelectedSlotMachine());
+        textField.append("Slot machine selected. Watch in console.");
+        textField.append($("<br>"));
+        printText(text[6], testGetMoneyFromSlotMachine);
+      }));
+    }
+
+    function testGetMoneyFromSlotMachine() {
+      textField.append($("<button>Get sum in slot</button>").addClass("btn").click(function () {
+        var slotMachine = casino.getSelectedSlotMachine();
+        textField.append(slotMachine.getMoney());
+        textField.append($("<br>"));
+
+        casino.showInConsole();
+
+        printText(text[7], testTakeMoneyFromSlotMachine);
+      }));
+    }
+
+    function testTakeMoneyFromSlotMachine() {
+      var takeMoneyInput = createInputForMoney();
+      takeMoneyInput.attr("id", "take-from-slot");
+      textField.append(takeMoneyInput);
+      textField.append($("<button>Take money from slot</button>").addClass("btn").click(function () {
+        var moneyValue = $("#take-from-slot").val();
+        var slotMachine = casino.getSelectedSlotMachine();
+        if (validMoneyInput(moneyValue)) {
+          if (moneyValue > slotMachine.getMoney()) {
+            alert("You enter value greater than slot machine has. Will be return all money");
+            moneyValue = slotMachine.getMoney();
+          }
+          textField.append("You take " + slotMachine.takeMoney(moneyValue) + "$");
+          textField.append($("<br>"));
+        }
+        printText(text[8], testAddMoneyToSlotMachine);
+      }));
+    }
+
+    function testAddMoneyToSlotMachine() {
+      var addMoneyInput = createInputForMoney();
+      addMoneyInput.attr("id", "add-to-slot");
+      textField.append(addMoneyInput);
+      textField.append($("<button>Add money to slot</button>").addClass("btn").click(function () {
+        var moneyValue = $("#add-to-slot").val();
+        var slotMachine = casino.getSelectedSlotMachine();
+        if (validMoneyInput(moneyValue)) {
+          slotMachine.addMoney(moneyValue);
+          textField.append("You add " + moneyValue + "$");
+          textField.append($("<br>"));
+        }
+        printText(text[9], addPlayButton);
+      }));
+    }
+    //Testing finish
+
+    function addPlayButton() {
+      textField.append($("<button>Play</button>").addClass("btn").click(function () {
+        play();
+      }));
+    }
+
+    //Play Game!!!
+    function play() {
+
+    }
+
+    function createInputForMoney() {
+      return $("<input>").attr({
+        "type": "number",
+        "value": "1"
+      }).addClass("take-money");
+    }
+
+    function validMoneyInput(money) {
+      if (isNaN(+money)) {
+        alert("You enter NaN. You did not take money");
+        return false;
+      } else if (money < 1) {
+        alert("Not correct sum.")
+        return false;
+      }
+      return true;
+    }
+
+    function createActiveSlotMachines() {
+      var select = $("<select>Remove slot number</select>").addClass("select");
+      for (var i = 0; i < casino.getMachineCount(); i++) {
+        select.append(createOption(i));
+      }
+      return select;
     }
 
     function createOption(index) {
@@ -102,6 +216,7 @@
     this._slotMachineCount = slotMachineCount;
     this._totalSum = money;
     this._machines = [];
+    this._selectedMachine = null;
 
     var self = this;
 
@@ -120,7 +235,7 @@
     }
 
     function setLucky() {
-      var luckyIndex = Math.round(Math.random() * (self._slotMachineCount));
+      var luckyIndex = Math.floor(Math.random() * (self._slotMachineCount));
       self._machines[luckyIndex].setLucky();
     }
 
@@ -128,10 +243,10 @@
   }
 
   //It is for supports and teachers
-  Casino.prototype.showInConsole = function() {
-    for (i = 0; i < self._machines.length; i++) {
-        console.log(self._machines[i]);
-      }
+  Casino.prototype.showInConsole = function () {
+    console.log("machines ", this._machines);
+    console.log("total sum " + this._totalSum);
+    console.log("selected machine " + this._selectedMachine);
   }
 
   Casino.prototype.getTotalSum = function () {
@@ -150,6 +265,7 @@
     var newMachine = new SlotMachine(Math.floor(maxMoney / 2));
     this._machines.push(newMachine);
     this._slotMachineCount++;
+    this._totalSum += newMachine.getMoney();
 
     this.showInConsole();
   }
@@ -160,15 +276,57 @@
     this._slotMachineCount--;
 
     //divide money
-    var money = removingSlot.getMoney();
-    var moneyPerSlot = money/this._machines.length;
+    var money = removingSlot[0].getMoney();
+    var moneyPerSlot = Math.floor(money / this._machines.length);
     for (var i = 0; i < this._machines.length; i++) {
       this._machines[i].addMoney(moneyPerSlot);
-      money-=moneyPerSlot;
+      money -= moneyPerSlot;
     }
     this._machines[0].addMoney(money);
 
     this.showInConsole();
+  }
+
+  Casino.prototype.takeMoney = function (value) {
+    var money = 0;
+    var takeMoney = 0;
+    while (money < value) {
+      //find slot with max sum
+      var slot = findMaxMoney.call(this);
+      console.log(money, value);
+      if (slot.getMoney() > (value - money)) {
+        takeMoney = value - money
+        money += takeMoney;
+        slot.takeMoney(takeMoney);
+        this._totalSum -= takeMoney;
+      } else {
+        money += slot.getMoney();
+        this._totalSum -= slot.getMoney();
+        slot.takeMoney(slot.getMoney());
+      }
+    }
+
+    Casino.prototype.selectSlotMachine = function (index) {
+      if (index < 0 || index > this._machines.length) {
+        alert("Not correct index");
+        return;
+      }
+      this._selectedMachine = this._machines[index];
+    }
+
+    Casino.prototype.getSelectedSlotMachine = function () {
+      return this._selectedMachine;
+    }
+
+    function findMaxMoney() {
+      return this._machines.reduce(function (prev, cur) {
+        return (prev.getMoney() >= cur.getMoney()) ? prev : cur;
+      })
+    }
+
+    this.showInConsole();
+
+    return money;
   }
 
   //Class
@@ -185,10 +343,15 @@
     this._money += money;
   }
 
+  SlotMachine.prototype.takeMoney = function (money) {
+    this._money -= money;
+    return money;
+  }
+
   SlotMachine.prototype.getMoney = function () {
     return this._money;
   }
 
-  var casino = new Casino(5, 10000002);
+  var casino = new Casino(5, 1002);
   testMethod();
 })();
