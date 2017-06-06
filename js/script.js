@@ -635,7 +635,5 @@
   var casino = new Casino(5, 1002);
   var user = new User("User", 100);
   casino.init(); //create all slot machines
-  //TODO: delete comment
-  //testMethod();
-  addPlayButton();
+  testMethod();
 })();
