@@ -246,7 +246,7 @@
       nextArrow: "",
       touchMove: false,
       swipe: false,
-      speed: 50
+      speed: 30
     });
     $(".drum1").slick("slickNext");
     $(".drum2").slick({
@@ -255,7 +255,7 @@
       nextArrow: "",
       touchMove: false,
       swipe: false,
-      speed: 50
+      speed: 30
     });
     $(".drum2").slick("slickNext");
     $(".drum3").slick({
@@ -264,7 +264,7 @@
       nextArrow: "",
       touchMove: false,
       swipe: false,
-      speed: 50
+      speed: 30
     });
     $(".drum3").slick("slickNext");
   }
@@ -316,28 +316,25 @@
     drum.append($("<img>").attr("src", "img/jquery.png"));
     drum.append($("<img>").attr("src", "img/materialize.png"));
     drum.append($("<img>").attr("src", "img/nodejs.png"));
-    drum.append($("<img>").attr("src", "img/Number-7.png"));
     drum.append($("<img>").attr("src", "img/sass.png"));
+    drum.append($("<img>").attr("src", "img/Number-7.png"));
     return drum;
   }
 
   function startGame() {
-    //valid rate
-    var userRate = $(".money-input").val();
-    validMoneyInput(userRate);
-    if (userRate > user.getBudget()) {
-      alert("Not enough money");
-      userRate = user.getBudget();
-      return;
-    }
-
     //identify machine
     var machineIndex = $(this).closest(".slot").attr("data-slot");
     var machine = casino.getSlotMachines()[machineIndex];
+    //valid rate
+    var userRate = $(".money-input").eq(machineIndex).val();
+    validMoneyInput(userRate);
+    if (userRate > user.getBudget()) {
+      alert("Not enough money");
+      return;
+    }
 
-    if (userRate > machine.getMoney() * 5) {
+    if (userRate * 5 > machine.getMoney()) {
       alert("Oversized rate for this slot machine");
-      userRate = machine.getMoney();
       return;
     }
 
@@ -351,7 +348,22 @@
     console.log(machine, user);
     user.takeMoney(userRate);
     machine.addMoney(userRate);
-    console.log(machine, user);
+    $(".budget-value").text(user.getBudget());
+
+    var countTimersEnd = 0;
+
+    if(machine.isLucky()) {
+      var drum1 = carousels.children(".drum1");
+      var drum2 = carousels.children(".drum2");
+      var drum3 = carousels.children(".drum3");
+      drum1.slick("slickGoTo", 6); 
+      drum2.slick("slickGoTo", 6);
+      drum3.slick("slickGoTo", 6);
+
+      setTimeout(watchResult, 300, drum1, drum2, drum3, userRate, machine);
+
+      return;
+    }
 
     //scrolling
     var steps = [getRandomStep(50), getRandomStep(50), getRandomStep(50)];
@@ -361,7 +373,7 @@
         carousels.children(".drum1").slick("slickNext");
       } else {
         clearInterval(timer1);
-        console.log(steps);
+        timeOut();
       }
     }, 100);
     var timer2 = setInterval(function () {
@@ -370,7 +382,7 @@
         carousels.children(".drum2").slick("slickNext");
       } else {
         clearInterval(timer2);
-        console.log(steps);
+        timeOut();
       }
     }, 100);
     var timer3 = setInterval(function () {
@@ -379,11 +391,44 @@
         carousels.children(".drum3").slick("slickNext");
       } else {
         clearInterval(timer3);
-        console.log(steps);
+        timeOut();
       }
     }, 100)
-    
 
+    function timeOut() {
+      if(countTimersEnd === 2) {
+        watchResult(carousels.children(".drum1"),
+        carousels.children(".drum2"),
+        carousels.children(".drum3"), userRate, machine); //interpret result
+      } else {
+        countTimersEnd++;
+      }
+    }
+  }
+
+  function watchResult(drum1, drum2, drum3, userRate, machine) {
+    //find uniq value. if 3 - lose, 2 - x2, 3- x5
+    var indexes = [drum1.slick("slickCurrentSlide"),
+    drum2.slick("slickCurrentSlide"),
+    drum3.slick("slickCurrentSlide")];
+
+    var uniq = _.uniq(indexes);
+    if(uniq.length == 2) {
+      alert("Win x2");
+      user.addMoney(userRate*2);
+      machine.takeMoney(userRate*2);
+
+    } else if(uniq.length == 1) {
+      alert("Win x5");
+      user.addMoney(userRate*5);
+      machine.takeMoney(userRate*5);
+    } else {
+      alert("You lose");
+    }
+
+    $(".budget-value").text(user.getBudget());
+
+    console.log(user, machine);
   }
 
   function getRandomStep(max) {
@@ -535,6 +580,10 @@
     this._lucky = true;
   }
 
+  SlotMachine.prototype.isLucky = function() {
+    return this._lucky;
+  }
+
   SlotMachine.prototype.addMoney = function (money) {
     this._money += +money;
     casino.calcTotalSum();
@@ -572,6 +621,14 @@
       this._budget -= money;
     } else {
       alert("Not enough money");
+    }
+  }
+
+  User.prototype.addMoney = function(money) {
+    if(validMoneyInput(money)) {
+      this._budget += money;
+    } else {
+      alert("Not correct value of money");
     }
   }
 
