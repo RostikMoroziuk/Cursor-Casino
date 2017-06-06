@@ -2,6 +2,7 @@
   function testMethod() {
     //Comma separate strings in different test 
     var text = ["Hi! First of all, I will show you that all method of Casino and SlotMachine work.\
+    Current state of casino you can watch in console.\
     Press `Get total sum` to get total sum.",
       "Great! To get number of slot machines press `Get slot count`.",
       "Great work! Now you can add new slot machine (start sum will be calculate as half of the biggest sum in slot machines)",
@@ -23,6 +24,8 @@
         textField.append(casino.getTotalSum());
         textField.append($("<br>"));
 
+        casino.showInConsole();
+
         printText(text[1], testGetSlotMachineCount);
       }))
 
@@ -33,6 +36,8 @@
         textField.append(casino.getMachineCount());
         textField.append($("<br>"));
 
+        casino.showInConsole();
+
         printText(text[2], testAddNewSlotMachine);
       }))
     }
@@ -42,6 +47,8 @@
         casino.addNewSlotMachine()
         textField.append("Added new slot machine");
         textField.append($("<br>"));
+
+        casino.showInConsole();
 
         printText(text[3], testRemoveSlotMachine);
       }))
@@ -55,6 +62,9 @@
         casino.removeSlotMachine()
         textField.append("Slot machine removed");
         textField.append($("<br>"));
+
+        casino.showInConsole();
+
         printText(text[4], testTakeMoney);
       }));
     }
@@ -74,6 +84,9 @@
           textField.append("You take " + casino.takeMoney(moneyValue) + "$");
           textField.append($("<br>"));
         }
+
+        casino.showInConsole();
+
         printText(text[5], testSelectSlotMachine);
       }));
     }
@@ -85,9 +98,11 @@
 
       textField.append($("<button>Select machine</button>").addClass("btn").click(function () {
         casino.selectSlotMachine($("#select-machine").val());
-        console.log(casino.getSelectedSlotMachine());
         textField.append("Slot machine selected. Watch in console.");
         textField.append($("<br>"));
+
+        casino.showInConsole();
+
         printText(text[6], testGetMoneyFromSlotMachine);
       }));
     }
@@ -116,9 +131,15 @@
             alert("You enter value greater than slot machine has. Will be return all money");
             moneyValue = slotMachine.getMoney();
           }
+
+          casino.showInConsole();
+
           textField.append("You take " + slotMachine.takeMoney(moneyValue) + "$");
           textField.append($("<br>"));
         }
+
+        casino.showInConsole();
+
         printText(text[8], testAddMoneyToSlotMachine);
       }));
     }
@@ -135,6 +156,9 @@
           textField.append("You add " + moneyValue + "$");
           textField.append($("<br>"));
         }
+
+        casino.showInConsole();
+
         printText(text[9], addPlayButton);
       }));
     }
@@ -246,7 +270,7 @@
   Casino.prototype.showInConsole = function () {
     console.log("machines ", this._machines);
     console.log("total sum " + this._totalSum);
-    console.log("selected machine " + this._selectedMachine);
+    console.log("selected machine ", this._selectedMachine);
   }
 
   Casino.prototype.getTotalSum = function () {
@@ -266,8 +290,6 @@
     this._machines.push(newMachine);
     this._slotMachineCount++;
     this._totalSum += newMachine.getMoney();
-
-    this.showInConsole();
   }
 
   Casino.prototype.removeSlotMachine = function () {
@@ -283,8 +305,6 @@
       money -= moneyPerSlot;
     }
     this._machines[0].addMoney(money);
-
-    this.showInConsole();
   }
 
   Casino.prototype.takeMoney = function (value) {
@@ -293,7 +313,6 @@
     while (money < value) {
       //find slot with max sum
       var slot = findMaxMoney.call(this);
-      console.log(money, value);
       if (slot.getMoney() > (value - money)) {
         takeMoney = value - money
         money += takeMoney;
@@ -306,27 +325,24 @@
       }
     }
 
-    Casino.prototype.selectSlotMachine = function (index) {
-      if (index < 0 || index > this._machines.length) {
-        alert("Not correct index");
-        return;
-      }
-      this._selectedMachine = this._machines[index];
-    }
-
-    Casino.prototype.getSelectedSlotMachine = function () {
-      return this._selectedMachine;
-    }
-
     function findMaxMoney() {
       return this._machines.reduce(function (prev, cur) {
         return (prev.getMoney() >= cur.getMoney()) ? prev : cur;
       })
     }
-
-    this.showInConsole();
-
     return money;
+  }
+
+  Casino.prototype.selectSlotMachine = function (index) {
+    if (index < 0 || index > this._machines.length) {
+      alert("Not correct index");
+      return;
+    }
+    this._selectedMachine = this._machines[index];
+  }
+
+  Casino.prototype.getSelectedSlotMachine = function () {
+    return this._selectedMachine;
   }
 
   //Class
