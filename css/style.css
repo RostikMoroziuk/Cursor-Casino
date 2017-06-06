@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css?family=Pacifico');
 * {
   margin: 0;
   padding: 0;
@@ -12,8 +13,26 @@ body {
   height: 100vh;
 }
 
-.method-test {
+.method-test,
+.play {
   min-height: 100%;
+}
+
+.play {
+  padding: 50px;
+}
+
+.slider-nav {
+  width: 450px;
+  margin: 100px auto;
+}
+
+.slider-for {
+  width: 350px;
+  margin: 0 auto;
+}
+
+.method-test {
   background-color: #1d1f20;
   color: #a7925a;
   font-size: 30px;
@@ -41,4 +60,64 @@ body {
   height: 30px;
   width: 100px;
   border: none;
+}
+
+.slot {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  width: 350px;
+  height: 280px;
+  background-color: #85C5D6;
+  font-family: 'Pacifico', cursive;
+  border-radius: 50px 50px;
+}
+
+.slot .name {
+  margin-top: 20px;
+  font-size: 25px;
+}
+
+.slot .inputs {
+  margin-bottom: 20px;
+  font-size: 20px;
+  width: 200px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.slot .money-input {
+  width: 50px;
+}
+
+.slot .start-btn,
+.slot .money-input {
+  height: 35px;
+  font-size: 25px;
+}
+
+.slot .start-btn {
+  width: 80px;
+  height: 35px;
+  border: none;
+  background-color: #2B7682;
+}
+
+.carousels {
+  display: flex;
+  flex-grow: 1;
+  align-items: center;
+  width: 300px;
+}
+
+.drum1 img,
+.drum2 img,
+.drum3 img {
+  width: 100px;
+  height: 100px;
+}
+
+.slick-next::before,
+.slick-prev::before{
+  color: #3498db;
 }
