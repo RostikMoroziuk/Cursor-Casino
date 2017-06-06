@@ -223,7 +223,7 @@
       } else {
         textField.append(text.charAt(i++)); //print text
       }
-    }, 1)
+    }, 30)
   }
 
   //Class
@@ -262,8 +262,6 @@
       var luckyIndex = Math.floor(Math.random() * (self._slotMachineCount));
       self._machines[luckyIndex].setLucky();
     }
-
-    this.showInConsole();
   }
 
   //It is for supports and teachers
@@ -293,7 +291,7 @@
   }
 
   Casino.prototype.removeSlotMachine = function () {
-    var removeMachineIndex = $("#remove-machine");
+    var removeMachineIndex = $("#remove-machine").val();
     var removingSlot = this._machines.splice(removeMachineIndex, 1);
     this._slotMachineCount--;
 
